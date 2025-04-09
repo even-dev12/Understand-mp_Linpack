@@ -1,3 +1,15 @@
+# Understand and Run LINPACK
+
+- [Understand and Run LINPACK](#understand-and-run-linpack)
+  - [Understanding Intel's MKL LINPACK Process Flow](#understanding-intels-mkl-linpack-process-flow)
+    - [runme\_intel\_dynamic](#runme_intel_dynamic)
+      - [I\_MPI\_HYDRA\_HOST\_FILE](#i_mpi_hydra_host_file)
+    - [mpirun](#mpirun)
+    - [mpiexec.hydra](#mpiexechydra)
+      - [But What the Heck Does that Mean](#but-what-the-heck-does-that-mean)
+    - [runme\_intel64\_prv](#runme_intel64_prv)
+    - [xhpl\_intel64\_dynamic](#xhpl_intel64_dynamic)
+
 ## Intel® oneAPI Math Kernel Library
 La Intel® oneAPI Math Kernel Library (oneMKL) è una libreria matematica ottimizzata e altamente parallelizzata, progettata per applicazioni che richiedono massime prestazioni. Questa libreria offre interfacce di programmazione in linguaggi Fortran e C e include esempi di codice situati nella sottodirectory "examples" della directory di installazione.
 
@@ -62,7 +74,7 @@ The Intel® Distribution for LINPACK Benchmark contains a sample build script bu
   
 • Run the script build.sh.
 
-## Process Flow: 
+## Understanding Intel's MKL LINPACK Process Flow
 
 ```
                 +---------------------+
@@ -270,4 +282,4 @@ fi
 ```
 
 By default, neither of these are used and this can be ignored.
------ MPI_RANKS
+-----> MPI_RANKS
