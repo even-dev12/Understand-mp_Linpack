@@ -1,5 +1,4 @@
-# Understand-mp_Linpack
-
+## Intel® oneAPI Math Kernel Library
 La Intel® oneAPI Math Kernel Library (oneMKL) è una libreria matematica ottimizzata e altamente parallelizzata, progettata per applicazioni che richiedono massime prestazioni. Questa libreria offre interfacce di programmazione in linguaggi Fortran e C e include esempi di codice situati nella sottodirectory "examples" della directory di installazione.
 
 Il benchmark LINPACK di Intel misura il tempo necessario per fattorizzare e risolvere un sistema di equazioni lineari denso e casuale (Ax=b) in precisione reale*8, convertendo questo tempo in un tasso di performance e verificando l'accuratezza dei risultati. Il benchmark utilizza la generazione di numeri casuali e il pivoting completo di riga per garantire l'accuratezza dei risultati.
@@ -8,37 +7,42 @@ La Intel® Distribution for LINPACK Benchmark è basata su modifiche e aggiunte 
 
 Le versioni ottimizzate del benchmark LINPACK fornite da Intel facilitano l'ottenimento di risultati elevati sui sistemi basati su processori Intel autentici, più facilmente rispetto al benchmark HPL standard. I binari precompilati richiedono che la libreria Intel® MPI sia installata sul cluster.
 
+## Intel® oneAPI Math Kernel Library Benchmarks 
+• LINPACK Benchmark
+• LINPACK Benchmark for a Customized MPI Implementation
+• Optimized HPL-AI* Benchmark
 
-# File in benchmarks\linpack\ -->	Description
-- xlinpack_xeon64 => The 64-bit program executable for a system with Intel Xeon processor using Intel 64 architecture.
-- runme_xeon64 => A sample shell script for executing a pre determined problem set for xlinpack_xeon64. OMP_NUM_THREADS set to 4 processors.
-- lininput_xeon64	=> Input file for pre-determined problem for the runme_xeon64 script.
-- lin_xeon64.txt => Result of the runme_xeon64 script execution
-
-# Known Limitations of the Intel® Optimized LINPACK Benchmark
+## LINPACK Benchmark
 The following limitations are known for the Intel Optimized LINPACK Benchmark for Linux*:
 • Intel Optimized LINPACK Benchmark supports only OpenMP threading
 
-## LINPACK Benchmark that supports mpi
+# File in benchmarks\linpack\ -->	Description
+• xlinpack_xeon64 => The 64-bit program executable for a system with Intel Xeon processor using Intel 64 architecture.
+• runme_xeon64 => A sample shell script for executing a pre determined problem set for xlinpack_xeon64. OMP_NUM_THREADS set to 4 processors.
+• lininput_xeon64	=> Input file for pre-determined problem for the runme_xeon64 script.
+• lin_xeon64.txt => Result of the runme_xeon64 script execution
+
+
+## LINPACK Benchmark for a Customized MPI Implementation
 The Intel® Distribution for LINPACK Benchmark includes prebuilt binaries linked with Intel® MPI library. For a customized MPI implementation, tools are also included to build a binary using Intel® oneAPI Math Kernel Library MPI wrappers.
 All the files are located in the ./benchmarks/mp_linpack/subdirectory of the Intel® oneAPI Math Kernel Library directory.
 
 # File in <mkl directory> /benchmarks/mp_linpack/ -->	Description
   Prebuilt executables for performance testing
-- xhpl_intel64_dynamic => Prebuilt binary for the Intel® 64 architecture dynamically linked against Intel MPI library
+• xhpl_intel64_dynamic => Prebuilt binary for the Intel® 64 architecture dynamically linked against Intel MPI library
   
   Run scripts and an input file example
-- runme_intel64_dynamic => Sample run script for the Intel® 64 architecture and binary dynamically linked against Intel MPI library
-- runme_intel64_prv	=> Script that sets HPL environment variables. It is called by runme_intel64_dynamic
-- HPL.dat => Example of an HPL configuration file.
+• runme_intel64_dynamic => Sample run script for the Intel® 64 architecture and binary dynamically linked against Intel MPI library
+• runme_intel64_prv	=> Script that sets HPL environment variables. It is called by runme_intel64_dynamic
+• HPL.dat => Example of an HPL configuration file.
   
   Prebuilt libraries and utilities for building with a customized MPI implementation
-- build.sh => Build script for creating Intel® Distribution for LINPACK Benchmark for the Intel® 64 architecture with a customized MPI implementation
+• build.sh => Build script for creating Intel® Distribution for LINPACK Benchmark for the Intel® 64 architecture with a customized MPI implementation
 
 ## Building the Intel® Distribution for LINPACK* Benchmark (and the Intel® Optimized HPL-AI* Benchmark) for a Customized MPI Implementation
 The Intel® Distribution for LINPACK Benchmark contains a sample build script build.sh. If you are using a customized MPI implementation, this script builds a binary using Intel® oneAPI Math Kernel Library (oneMKL) MPI wrappers. To build the binary, follow these steps:
 
-- Specify the location of Intel® oneAPI Math Kernel Library (oneMKL) to be used (MKLROOT) .
+• Specify the location of Intel® oneAPI Math Kernel Library (oneMKL) to be used (MKLROOT) .
   
   La libreria da usare è quella in:
 
@@ -46,16 +50,18 @@ The Intel® Distribution for LINPACK Benchmark contains a sample build script bu
   Per LINPACK che supporta MPI : /archive/apps/INTEL/OneAPI/mkl/latest/benchmarks/mp_linpack/xhpl_intel64_dynamic 
 
   E potrai caricarla così: 	module load OneAPI/mkl/latest PER LINPACK NON MPI
-- Set up your MPI environment.
+• Set up your MPI environment.
 
   Scarica il test in base alle tue esigenze:
   
    **test LINPACK che non supporta mpi:**
-  - mediante installazione con il software CHECK : check --check linpack@x86 --install OneAPI/mkl/latest
+  • mediante installazione con il software CHECK : check --check linpack@x86 --install OneAPI/mkl/latest
     
    **test LINPACK che supporta mpi**
-  - mediante installazione con il software CHECK : check --check linpack@x86_mpi --install OneAPI/mkl/latest
-Run the script build.sh.
+  • mediante installazione con il software CHECK : check --check linpack@x86_mpi --install OneAPI/mkl/latest
+  
+• Run the script build.sh.
+
 ## Process Flow: 
 
 ```
@@ -91,7 +97,7 @@ Run the script build.sh.
 ```
 
 ### [runme_intel_dynamic](./binary/runme_intel64_dynamic)
-In my case I'm not running with GPUs and in this case, [runme_intel_dynamic](./binary/runme_intel64_dynamic) does not do a whole lot. It's main job is to kick off [mpirun](./binary/mpirun) with [runme_intel64_prv](./binary/runme_intel64_prv) as an argument. It does this here:
+In case you're not running with GPUs [runme_intel_dynamic](./binary/runme_intel64_dynamic) does not do a whole lot. It's main job is to kick off [mpirun](./binary/mpirun) with [runme_intel64_prv](./binary/runme_intel64_prv) as an argument. It does this here:
 
 ```bash
 mpirun -perhost ${MPI_PER_NODE} -np ${MPI_PROC_NUM} ./runme_intel64_prv "$@" | tee -a $OUT
@@ -146,24 +152,14 @@ Finally, we are missing one last thing that is completely absent in the document
 
 Use this option to specify host names on which to run the application. If a host name is repeated, this name is used only once.
 
+**Attenzione** : se avvii il test su nodo interattivo ti basterà usare $PBS_NODESFILE contenente una riga per ogni core richiesto
+
 See also the [I_MPI_HYDRA_HOST_FILE](#i_mpi_hydra_host_file) environment variable for more details.
 
 **NOTE:** Use the following options to change the process placement on the cluster nodes:  
 Use the -perhost, -ppn, and -grr options to place consecutive MPI processes on every host using the round robin scheduling.
 
 Use the -rr option to place consecutive MPI processes on different hosts using the round robin scheduling.
-
-#### -machinefile <machine file> or -machine <machine file>
-
-Use this option to control process placement through a machine file. To define the total number of processes to start, use the -n option. For example:
-
-```bash
-$ cat ./machinefile
-node0:2
-node1:2
-node0:1
-```
-
 
 #### I_MPI_HYDRA_HOST_FILE
 Set the host file to run the application.
