@@ -1,9 +1,13 @@
 # Understand-mp_Linpack
 
 La Intel® oneAPI Math Kernel Library (oneMKL) è una libreria matematica ottimizzata e altamente parallelizzata, progettata per applicazioni che richiedono massime prestazioni. Questa libreria offre interfacce di programmazione in linguaggi Fortran e C e include esempi di codice situati nella sottodirectory "examples" della directory di installazione.
+
 Il benchmark LINPACK di Intel misura il tempo necessario per fattorizzare e risolvere un sistema di equazioni lineari denso e casuale (Ax=b) in precisione reale*8, convertendo questo tempo in un tasso di performance e verificando l'accuratezza dei risultati. Il benchmark utilizza la generazione di numeri casuali e il pivoting completo di riga per garantire l'accuratezza dei risultati.
+
 La Intel® Distribution for LINPACK Benchmark è basata su modifiche e aggiunte al benchmark High-Performance LINPACK (HPL). Per utilizzare questo benchmark, è necessario conoscere l'uso di HPL. La distribuzione di Intel offre miglioramenti volti a rendere l'uso di HPL più conveniente e a migliorare le prestazioni tramite l'uso di configurazioni Intel® MPI (Message-Passing Interface).
+
 Le versioni ottimizzate del benchmark LINPACK fornite da Intel facilitano l'ottenimento di risultati elevati sui sistemi basati su processori Intel autentici, più facilmente rispetto al benchmark HPL standard. I binari precompilati richiedono che la libreria Intel® MPI sia installata sul cluster.
+
 
 # File in benchmarks\linpack\ -->	Description
 - xlinpack_xeon64 => The 64-bit program executable for a system with Intel Xeon processor using Intel 64 architecture.
@@ -31,6 +35,27 @@ All the files are located in the ./benchmarks/mp_linpack/subdirectory of the Int
   Prebuilt libraries and utilities for building with a customized MPI implementation
 - build.sh => Build script for creating Intel® Distribution for LINPACK Benchmark for the Intel® 64 architecture with a customized MPI implementation
 
+## Building the Intel® Distribution for LINPACK* Benchmark (and the Intel® Optimized HPL-AI* Benchmark) for a Customized MPI Implementation
+The Intel® Distribution for LINPACK Benchmark contains a sample build script build.sh. If you are using a customized MPI implementation, this script builds a binary using Intel® oneAPI Math Kernel Library (oneMKL) MPI wrappers. To build the binary, follow these steps:
+
+- Specify the location of Intel® oneAPI Math Kernel Library (oneMKL) to be used (MKLROOT) .
+  
+  La libreria da usare è quella in:
+
+  Per LINPACK che non supporta MPI : /archive/apps/INTEL/OneAPI/mkl/latest/benchmarks/linpack/xlinpack_xeon64 
+  Per LINPACK che supporta MPI : /archive/apps/INTEL/OneAPI/mkl/latest/benchmarks/mp_linpack/xhpl_intel64_dynamic 
+
+  E potrai caricarla così: 	module load OneAPI/mkl/latest PER LINPACK NON MPI
+- Set up your MPI environment.
+
+  Scarica il test in base alle tue esigenze:
+  
+   **test LINPACK che non supporta mpi:**
+  - mediante installazione con il software CHECK : check --check linpack@x86 --install OneAPI/mkl/latest
+    
+   **test LINPACK che supporta mpi**
+  - mediante installazione con il software CHECK : check --check linpack@x86_mpi --install OneAPI/mkl/latest
+Run the script build.sh.
 ## Process Flow: 
 
 ```
@@ -64,24 +89,6 @@ All the files are located in the ./benchmarks/mp_linpack/subdirectory of the Int
         +---------------------------------+
 
 ```
-
-## Building the Intel® Distribution for LINPACK* Benchmark for a Customized MPI Implementation
-
-Per compilare il benchmark, segui questi passi:
-1.	**Specifica la posizione della Intel® oneAPI Math Kernel Library (MKLROOT)**
-
-La libreria da usare è quella in:
-
-/archive/apps/INTEL/OneAPI/mkl/latest/benchmarks/linpack/xlinpack_xeon64
-
-E potrai caricarla così: 	module load OneAPI/mkl/latest
-
-2.	**Configura l'ambiente MPI**
-
-Dovrai caricare il seguente modulo: 	module load OneAPI_2025/mpi/latest
-
-3.	**Run the script build.sh**
-
 
 ### [runme_intel_dynamic](./binary/runme_intel64_dynamic)
 In my case I'm not running with GPUs and in this case, [runme_intel_dynamic](./binary/runme_intel64_dynamic) does not do a whole lot. It's main job is to kick off [mpirun](./binary/mpirun) with [runme_intel64_prv](./binary/runme_intel64_prv) as an argument. It does this here:
