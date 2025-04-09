@@ -7,6 +7,7 @@
       - [Using LU Decomposition for Matrix Inversion](#using-lu-decomposition-for-matrix-inversion)
       - [Example of Using LU Decomposition for Matrix Inversion](#example-of-using-lu-decomposition-for-matrix-inversion)
       - [Advantages of LU Decomposition:](#advantages-of-lu-decomposition)
+  - [How the Benchmark Measures Performance - Calculating FLOPS](#how-the-benchmark-measures-performance---calculating-flops)
 
 ## Understanding the Benchmark's Math - LU Decomposition (Factorization)
 
@@ -201,4 +202,11 @@ print(A_inv)
 - **Computational Efficiency:** LU decomposition reduces the problem to solving triangular matrices, which is computationally cheaper than the direct method. The overall complexity remains $O(n^3)$ but with a significantly lower constant factor.
 - **Reusability:** Once $A$ has been decomposed into $L$ and $U$, these matrices can be reused to solve multiple systems or invert other matrices derived from $A$, without the need to perform decomposition again.
 - **Numerical Stability:** Partial pivoting (adjusting $L$ and $U$ during decomposition to maintain stability) ensures that LU decomposition is more numerically stable than direct inversion, especially for matrices that are close to singular.
+
+ 
+## How the Benchmark Measures Performance - Calculating FLOPS
+
+The benchmark calculates the total number of floating-point operations required to perform the LU decomposition and solves the system. It then measures the time taken to execute these operations, using this to calculate the system's performance in floating-point operations per second (FLOPS). The key metric is the maximum achieved FLOPS rate during the test.
+
+
 
