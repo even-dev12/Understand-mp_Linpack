@@ -261,7 +261,7 @@ Ok, so those were the descriptions in the docs for `-n` and `-ppn` but at least 
 
 ### [runme_intel64_prv](./binary/runme_intel64_prv)
 
-This is where things get hairy in my opinion. Very hairy, so I will go through this one line by line. For this example, I'm going to assume the following settings:
+For this example, I'm going to assume the following settings:
 
 - `np` aka `MPI_PROC_NUM` (in `runme_intel64_dynamic`) = 8
 - `ppn` aka `perhost` aka `MPI_PER_NODE` = 2
@@ -270,10 +270,6 @@ This is where things get hairy in my opinion. Very hairy, so I will go through t
 - `q` = 4
 
 ```bash
-# For Mvapich
-if [ -n "${MPIRUN_RANK}" ]
-then PMI_RANK=${MPIRUN_RANK}
-fi
 
 # For OpenMPI
 if [ -n "${OMPI_COMM_WORLD_RANK}" ]
