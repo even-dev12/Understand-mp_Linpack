@@ -156,61 +156,29 @@ where
 - **-p <grid row dimension>**: Sets the rows dimension of the process grid
 - **-q <grid column dimension>**: Sets the columns dimension of the process grid
 
-Finally, we are missing one last thing that is completely absent in the documentation or comments. If you are not running under a job manager you have to specify the nodes for `mpiexec.hydra` using one of the two following options:
+### Example: Running Linpack on an Interactive Intel Node (Current Issue)
 
-#### -hostfile <hostfile> or -f <hostfile>
-
-Use this option to specify host names on which to run the application. If a host name is repeated, this name is used only once.
-
-**Attenzione** : se avvii il test su nodo interattivo ti basterà usare $PBS_NODESFILE contenente una riga per ogni core richiesto
-
-See also the [I_MPI_HYDRA_HOST_FILE](#i_mpi_hydra_host_file) environment variable for more details.
-
-**NOTE:** Use the following options to change the process placement on the cluster nodes:  
-Use the -perhost, -ppn, and -grr options to place consecutive MPI processes on every host using the round robin scheduling.
-
-Use the -rr option to place consecutive MPI processes on different hosts using the round robin scheduling.
-
-#### I_MPI_HYDRA_HOST_FILE
-Set the host file to run the application.
-
-**Syntax**  
-`I_MPI_HYDRA_HOST_FILE=<arg>`
-
-**Argument**  
-- `<arg>`: String parameter  
-- `<hostsfile>`: The full or relative path to the host file  
-
-**Description**  
-Set this environment variable to specify the hosts file.
-
-So basically, it's just a list of hostnames one per line.
-
-### [mpirun](./binary/mpirun)
-
-The [mpirun](./binary/mpirun) bash script's job is to set up the MPI environment and then call mpiexec.hydra on a single node in the cluster. mpiexec.hydra will then deploy instances of [runme_intel64_prv](./binary/runme_intel64_prv) across the cluster.
-
-I'll go through the highlights of [mpirun](./binary/mpirun). First it sets up a bunch of environment variables with the main one being `I_MPI_MPIRUN`. This is used internally by Intel's binaries to determine how the process was launched. 
+While testing the Linpack benchmark on an interactive Intel node using mpiexec, the following command was executed:
 
 ```bash
-export I_MPI_MPIRUN="mpirun"
+mpiexec -hosts dvnode069.cm.cluster ./runme_intel64_dynamic -np ${MPI_PROC_NUM} -n 49536 -b 192 -p 1 -q 3
+
+Note: ${MPI_PROC_NUM} is set according to the number of MPI processes intended for the test.
+
 ```
 
-In this case, we launched it with the `mpirun` bash script and this environment variable tells the binaries that. Alternatively, we could have launched by calling `mpiexec` directly. The rest of the code is for handling what happens if we are launching with a job scheduler. In our case we are not so I ignore this. If we have no job scheduler, it executes this code:
-
-```bash
-# PBS or ordinary job
-else
-    mpiexec.hydra "$@" <&0
-    rc=$?
-fi
+However, the current execution returns the following errors:
+```
+Illegal input in file HPL.dat. Exiting ...
+Need at least 3 processes for these tests
 ```
 
-which will launch `mpiexec.hydra` on the current node with whatever command line arguments were passed in from `mpirun` which by default are inhereted from `runme_intel64_dynamic` and are:
+This indicates that the configuration used by runme_intel64_dynamic is not valid for the current MPI setup (most likely due to the number of processes or matrix size). The test is not working as expected at this stage.
 
-```bash
--perhost ${MPI_PER_NODE} -np ${MPI_PROC_NUM} ./runme_intel64_prv "$@" | tee -a $OUT
-```
+Work is in progress to correctly configure the HPL.dat file and MPI environment so that the Linpack MPI benchmark runs successfully on this node.
+
+
+
 
 ### [runme_intel64_prv](./binary/runme_intel64_prv)
 
