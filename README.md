@@ -201,7 +201,8 @@ fi
 By default, neither of these are used and this can be ignored.
 -----> MPI_RANKS
 
+## Useful Links
 
-Where you can find reference documentation for the usage of the new Leonardo supercomputer davinci-1 in : https://gitlab.leonardocompany.com/HPCC/hpc_usage/-/blob/master/Overview/General%20information/README.md
+Reference documentation for the usage of the new Leonardo supercomputer davinci-1 in : https://gitlab.leonardocompany.com/HPCC/hpc_usage/-/blob/master/Overview/General%20information/README.md
 
 Also if you are using Intel processors you can find useful information for the HPL.dat configuration in : https://www.intel.com/content/www/us/en/developer/articles/technical/fourth-generation-xeon-scalable-family-overview.html
