@@ -5,8 +5,6 @@
     - [runme\_intel\_dynamic](#runme_intel_dynamic)
       - [I\_MPI\_HYDRA\_HOST\_FILE](#i_mpi_hydra_host_file)
     - [mpirun](#mpirun)
-    - [mpiexec.hydra](#mpiexechydra)
-      - [But What the Heck Does that Mean](#but-what-the-heck-does-that-mean)
     - [runme\_intel64\_prv](#runme_intel64_prv)
     - [xhpl\_intel64\_dynamic](#xhpl_intel64_dynamic)
 
@@ -213,51 +211,6 @@ which will launch `mpiexec.hydra` on the current node with whatever command line
 ```bash
 -perhost ${MPI_PER_NODE} -np ${MPI_PROC_NUM} ./runme_intel64_prv "$@" | tee -a $OUT
 ```
-
-### [mpiexec.hydra](https://www.intel.com/content/www/us/en/docs/mpi-library/developer-reference-linux/2021-8/mpiexec-hydra.html)
-
-[mpiexec.hydra](https://www.intel.com/content/www/us/en/docs/mpi-library/developer-reference-linux/2021-8/mpiexec-hydra.html) is a process manager. In our case we are using Intel's instantiation, but it is an [open source project](https://github.com/pmodels/mpich/blob/main/doc/wiki/how_to/Using_the_Hydra_Process_Manager.md). mpiexec.hydra's job is to spawn our [runme_intel64_prv](./binary/runme_intel64_prv) jobs on the cluster. `-perhost ${MPI_PER_NODE} -np ${MPI_PROC_NUM}` plus the hostfile or machinefile I mentioned in [runme_intel64_dynamic](#runme_intel_dynamic) are what is interpreted by `mpiexec.hydra`. This is how the command line arguments are interpreted:
-
-**-n <number-of-processes> or -np <number-of-processes>**  
-Use this option to set the number of MPI processes to run with the current argument set. In our case, this is going to run n instances of `runme_intel64_prv`. `runme_intel64_prv` in turn launches `xhpl_intel64_dynamic`.
-
-**-perhost <# of processes >, -ppn <# of processes >, or -grr <# of processes>**  
-Use this option to place the specified number of consecutive MPI processes on every host in the group using round robin scheduling. See the I_MPI_PERHOST environment variable for more details.
-
-**NOTE:** When running under a job scheduler, these options are ignored by default. To be able to control process placement with these options, disable the I_MPI_JOB_RESPECT_PROCESS_PLACEMENT variable.
-
-Ultimately, the `-perhost` setting controls how many MPI processes will spawn on each node. On Intel MKL LINPACK, these processes are `runme_intel64_prv` which spawns one parent instance of `xhpl_intel64_dynamic` which then in turn spawns many child threads. This is explained in more detail later.
-
-`I_MPI_PERHOST` is defined as
-
-**I_MPI_PERHOST**
-
-Define the default behavior for the `-perhost` option of the `mpiexec.hydra` command.
-
-**Syntax**
-
-`I_MPI_PERHOST=<value>`
-
-**Argument**
-
-| `<value>`     | Description                                     |
-|---------------|-------------------------------------------------|
-| `<value>`     | Define a value used for `-perhost` by default   |
-| `integer > 0` | Exact value for the option                      |
-| `all`         | All logical CPUs on the node                    |
-| `allcores`    | All cores (physical CPUs) on the node. This is the default value. |
-
-**Description**
-
-Set this environment variable to define the default behavior for the `-perhost` option. Unless specified explicitly, the `-perhost` option is implied with the value set in `I_MPI_PERHOST`.
-
-> **NOTE:** When running under a job scheduler, this environment variable is ignored by default. To control process placement with `I_MPI_PERHOST`, disable the `I_MPI_JOB_RESPECT_PROCESS_PLACEMENT` variable.
-
-#### But What the Heck Does that Mean
-
-Ok, so those were the descriptions in the docs for `-n` and `-ppn` but at least for me it wasn't immediately obvious what that would end up doing. Let's start with `-n`. What `-n` does is it will spawn `-n` instances of whatever process is *fed to `mpiexec.hydra`*. In our case this is going to be `runme_intel64_prv`. So if `-n` is 8, you will have 8 instances of `runme_intel64_prv` spread out across all your nodes.
-
-`-ppn` will control how many instances of `runme_intel64_prv` spawn per node round robin'd. I explain this in more detail in the section on [runme\_intel64\_prv](#runme_intel64_prv). Each instance of `runme_intel64_prv` will in turn spawn one parent instance of `xhpl_intel64_dynamic` which will then spawn as many threads as are in the NUMA domains allocated to it (controlled by `NUMA_PER_MPI`).
 
 ### [runme_intel64_prv](./binary/runme_intel64_prv)
 
