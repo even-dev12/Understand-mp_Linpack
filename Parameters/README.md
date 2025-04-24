@@ -8,7 +8,8 @@
 
 #### 1. Problem Size (N)
 
-This is the size of the problem that LINPACK will solve. If you set this to 10,000, then LINPACK will solve for a 10,000x10,000 matrix. This subsequently controls the amount of memory the benchmark will use. For the benchmark you want the memory to be ~80%.
+This is the size of the problem that LINPACK will solve. If you set this to 10,000, then LINPACK will solve for a 10,000x10,000 matrix. This subsequently controls the amount of memory the benchmark will use. Increasing N usually increases performance, but the size of N is bounded by memory. In general, you can compute the memory required to store the matrix (which does not count internal buffers) as 8* N * N/(P*Q) bytes, where N is the problem size and P and Q are the process grids in HPL.dat.
+A general rule of thumb is to choose a problem size that fills 80% of memory
 
 $$
 N = \sqrt{\frac{{.8\times\text{Memory in Gigabytes}}}{8 \times \text{sizeof(double)}}}
@@ -16,7 +17,12 @@ $$
 
 Since each double-precision number uses 8 bytes, we divide the allocated memory in bytes by 8.
 
-### 2. Block Size (NB)
+For homogeneous runs, choose N divisible by NB*LCM(P,Q), where LCM is the least common multiple of the two numbers.
+
+For heterogeneous runs, see Heterogeneous Support in the Intel® Distribution for LINPACK* Benchmark for how to choose N.
+
+
+### 2. Block Size (NB) :  the block size of the data distribution
 
 I explain exactly how blocks work [in this section](#understanding-block-size-math). The high level is that instead of trying to do the matrix multiplication outright, we chunk it up into blocks and the size of these blocks is determined by the block size. Ex: If you were solving a 4x4 matrix and you selected a block size of 2 it would chunk that multiplication into multiplications with 2x2 matrices.
 
@@ -25,6 +31,23 @@ Common values range from 128 to 256. The optimal value often depends on the spec
 - **Cache Efficiency:** Smaller matrices fit to CPU cache speeding things up
 - **Data Locality:** By working on small contiguous blocks of the matrices at a time, the algorithm improves data locality, leading to better performance.
 - **Parallelization:** Each block multiplication can potentially be performed in parallel, offering opportunities for performance optimization in multicore or multiprocessor environments.
+
+
+
+Below- -> recommended values of NB for different Intel® processors:
+
+- Intel® Xeon® Processor X56*/E56*/E7-*/E7*/X7* (codenamed Nehalem or Westmere) --> 256
+
+- Intel Xeon Processor E26*/E26* v2 (codenamed Sandy Bridge or Ivy Bridge) --> 256
+
+- Intel Xeon Processor E26* v3/E26* v4 (codenamed Haswell or Broadwell) --> 192
+
+- Intel® Core™ i3/i5/i7-6* Processor (codenamed Skylake Client)	--> 192
+
+- Intel® Xeon Phi™ Processor 72* (codenamed Knights Landing) --> 336
+
+- Intel Xeon Processor supporting Intel® Advanced Vector Extensions 512 (Intel® AVX-512) instructions (codenamed Skylake Server) --> 384
+
 
 #### Understanding Block Size Math
 
@@ -171,6 +194,11 @@ Each $C_{ij}$ block is computed by adding the products of the 2x2 blocks from ma
 ### 3. Process Grid (P x Q)
 
 At the highest level, this controls the distribution of processes over a two-dimensional grid. P and Q are the dimensions of the grid.
+P and Q : the number of rows and columns in the process grid, respectively.
+
+P*Q must be the number of MPI processes that HPL is using.
+
+Choose P≤Q.
 
 Generally, what you want is:
 
@@ -179,5 +207,7 @@ P \times Q = \text{Total number of cores or threads}
 $$
 
 where we choose $P$ and $Q$ such that their product is equal to the number of physical cores or logical threads (if hyper-threading is enabled). The ideal grid minimizes the difference between $P$ and $Q$. For a system with 12 cores, you might use 3x4 or 2x6. You will probably want to explore different values to see which is best.
+
+
 
 Extending [the example for block size](#understanding-block-size-math), this is effectively assigning a core to each subblock we create. Ideally they match perfectly, but you really just want to get it as close as you can.
