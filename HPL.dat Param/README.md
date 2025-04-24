@@ -40,6 +40,22 @@ file                    device out (6=stdout,7=stderr,file)
 
 ## cosa sono questi parametri?
 
+**N**
+Hai 500 GB di memoria a disposizione, ma devi usare l'80% di questa memoria:
+
+500 GB × 0.8 = 400 GB
+
+Poiché 8×8=64, il calcolo diventa:
+
+𝑁 = RADICE (400 GB / 64)
+
+Calcolo finale: La radice quadrata di 6.25 è 2.5. Poiché stiamo calcolando la dimensione di una matrice, l'unità di N sarà il numero di righe (o colonne) della matrice, quindi:
+
+N=2500
+Per utilizzare 500 GB di memoria (l'80% dei 500 GB) e applicare la formula correttamente, N sarà 2500.
+
+Questo è il valore di N che devi utilizzare se desideri sfruttare 500 GB di memoria per il benchmark LINPACK, considerando una matrice di tipo double (8 byte).
+
 **PFACTs (Panel Factorization Type)**
 
 This parameter specifies the method used for the panel factorization during the LU decomposition. The options are:
@@ -97,6 +113,17 @@ This controls the type of data swapping method used for pivoting during the fact
 2 = Mixed (combines different swapping methods)
 
 The SWAP parameter determines how the matrix rows and columns are exchanged during the LU factorization to ensure numerical stability.
+
+**Swapping threshold**
+
+Il "swapping threshold" definisce la quantità di memoria utilizzata prima che il sistema inizi a spostare i dati dalla RAM al disco. Più precisamente, può essere visto come una percentuale di utilizzo della memoria o un valore assoluto che indica quando il sistema deve iniziare a fare swapping.
+
+In un sistema con grandi quantità di memoria (come nel caso di server o macchine ad alte prestazioni), lo swapping è generalmente qualcosa che si cerca di evitare, poiché l'accesso al disco è molto più lento rispetto all'accesso alla memoria RAM. L'idea è di mantenere il più possibile i dati in memoria RAM per evitare il rallentamento dovuto alla lettura e scrittura dei dati sul disco.
+Quindi è una soglia che determina quando il sistema inizia a usare la memoria di swap per compensare la mancanza di RAM.
+
+La scelta del valore dipende dal tipo di applicazione, dalla memoria disponibile, dalla velocità del disco e dalle esigenze di prestazioni.
+
+Un valore basso di swappiness (ad esempio, 10 o 20) è solitamente preferibile per evitare lo swapping, mentre un valore alto (ad esempio, 80 o 100) è adatto per sistemi che hanno bisogno di gestire molta memoria virtuale e che non soffrono eccessivamente delle prestazioni di I/O.
 
 ## command & new config
 
@@ -164,3 +191,5 @@ HPL ERROR from process # 0, on line 806 of function HPL_pdinfo:
 
 HPL ERROR from process # 0, on line 496 of function HPL_pdinfo:
 >> Need at least 16 processes for these tests <<
+
+
