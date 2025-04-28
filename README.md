@@ -136,7 +136,9 @@ HPL_NUMDEV # Numero di GPU.
 
 ```
 
-There are a few things going on with `mpirun -perhost ${MPI_PER_NODE} -np ${MPI_PROC_NUM} ./runme_intel64_prv "$@" | tee -a $OUT` that are not at all obvious at first. As I mentioned earlier, first this leads to `mpirun` executing, but none of the arguments are actually destined for `mpirun` What really happens is the arguments `-perhost ${MPI_PER_NODE} -np ${MPI_PROC_NUM}` are fed into [mpiexec.hydra](#mpiexechydra) and then the `$@` part of `./runme_intel64_prv "$@"` is ultimately destined for `xhpl_intel64_dynamic` which accepts the [Ease-of-use Command-line Parameters](https://www.intel.com/content/www/us/en/docs/onemkl/developer-guide-linux/2023-0/ease-of-use-command-line-parameters.html). The ease of use command line parameters are meant to replace `HPL.dat`. So instead of just running `runme_intel64_dynamic` you can do:
+There are a few things going on with `mpirun -perhost ${MPI_PER_NODE} -np ${MPI_PROC_NUM} ./runme_intel64_prv "$@" | tee -a $OUT` that are not at all obvious at first. As I mentioned earlier, first this leads to `mpirun` executing, but none of the arguments are actually destined for `mpirun` What really happens is the arguments `-perhost ${MPI_PER_NODE} -np ${MPI_PROC_NUM}` are fed into [mpiexec.hydra](#mpiexechydra) and then the `$@` part of `./runme_intel64_prv "$@"` is ultimately destined for `xhpl_intel64_dynamic` which accepts the [Ease-of-use Command-line Parameters](https://www.intel.com/content/www/us/en/docs/onemkl/developer-guide-linux/2023-0/ease-of-use-command-line-parameters.html).
+
+**The ease of use command line parameters are meant to replace `HPL.dat`**. So instead of just running `runme_intel64_dynamic` you can do:
 
 ```bash
 ./runme_intel64_dynamic -m <memory size in Mbytes> -b <block size> -p <grid row dimn> -q <grid column dimn>
@@ -156,27 +158,123 @@ where
 - **-p <grid row dimension>**: Sets the rows dimension of the process grid
 - **-q <grid column dimension>**: Sets the columns dimension of the process grid
 
+If you are not running under a job manager you have to specify the nodes for `mpiexec.hydra` using one of the two following options:
+
+#### -hostfile <hostfile> or -f <hostfile>
+
+Use this option to specify host names on which to run the application. If a host name is repeated, this name is used only once.
+
+**Attenzione** : se avvii il test su nodo interattivo ti basterà usare $PBS_NODESFILE contenente una riga per ogni core richiesto
+
+See also the [I_MPI_HYDRA_HOST_FILE](#i_mpi_hydra_host_file) environment variable for more details.
+
+**NOTE:** Use the following options to change the process placement on the cluster nodes:  
+Use the -perhost, -ppn, and -grr options to place consecutive MPI processes on every host using the round robin scheduling.
+
+Use the -rr option to place consecutive MPI processes on different hosts using the round robin scheduling.
+
+#### I_MPI_HYDRA_HOST_FILE
+Set the host file to run the application.
+
+**Syntax**  
+`I_MPI_HYDRA_HOST_FILE=<arg>`
+
+**Argument**  
+- `<arg>`: String parameter  
+- `<hostsfile>`: The full or relative path to the host file  
+
+**Description**  
+Set this environment variable to specify the hosts file.
+
+So basically, it's just a list of hostnames one per line.
+
+
 ### Example: Running Linpack on an Interactive Intel Node (Current Issue)
 
 While testing the Linpack benchmark on an interactive Intel node using mpiexec, the following command was executed:
 
 ```bash
-mpiexec -hosts dvnode069.cm.cluster ./runme_intel64_dynamic -np ${MPI_PROC_NUM} -n 49536 -b 192 -p 1 -q 3
+-hosts $PBS_NODEFILE ./runme_intel64_dynamic -np ${MPI_PROC_NUM} -n 300000 -b 256 -p 1 -q 3
 
-Note: ${MPI_PROC_NUM} is set according to the number of MPI processes intended for the test.
+Note: ${MPI_PROC_NUM} is set according to the number of MPI processes intended for the test.(increase 1 each 24 cores--> if 48 cores==>np = 2 )
 
-```
-
-However, the current execution returns the following errors:
-```
-Illegal input in file HPL.dat. Exiting ...
-Need at least 3 processes for these tests
 ```
 
 This indicates that the configuration used by runme_intel64_dynamic is not valid for the current MPI setup (most likely due to the number of processes or matrix size). The test is not working as expected at this stage.
 
 Work is in progress to correctly configure the HPL.dat file and MPI environment so that the Linpack MPI benchmark runs successfully on this node.
 
+### [mpirun](./binary/mpirun)
+
+The [mpirun](./binary/mpirun) bash script's job is to set up the MPI environment and then call mpiexec.hydra on a single node in the cluster. mpiexec.hydra will then deploy instances of [runme_intel64_prv](./binary/runme_intel64_prv) across the cluster.
+
+I'll go through the highlights of [mpirun](./binary/mpirun). First it sets up a bunch of environment variables with the main one being `I_MPI_MPIRUN`. This is used internally by Intel's binaries to determine how the process was launched. 
+
+```bash
+export I_MPI_MPIRUN="mpirun"
+```
+
+In this case, we launched it with the `mpirun` bash script and this environment variable tells the binaries that. Alternatively, we could have launched by calling `mpiexec` directly. The rest of the code is for handling what happens if we are launching with a job scheduler. In our case we are not so I ignore this. If we have no job scheduler, it executes this code:
+
+```bash
+# PBS or ordinary job
+else
+    mpiexec.hydra "$@" <&0
+    rc=$?
+fi
+```
+
+which will launch `mpiexec.hydra` on the current node with whatever command line arguments were passed in from `mpirun` which by default are inhereted from `runme_intel64_dynamic` and are:
+
+```bash
+-perhost ${MPI_PER_NODE} -np ${MPI_PROC_NUM} ./runme_intel64_prv "$@" | tee -a $OUT
+```
+
+
+### [mpiexec.hydra](https://www.intel.com/content/www/us/en/docs/mpi-library/developer-reference-linux/2021-8/mpiexec-hydra.html)
+
+[mpiexec.hydra](https://www.intel.com/content/www/us/en/docs/mpi-library/developer-reference-linux/2021-8/mpiexec-hydra.html) is a process manager. In our case we are using Intel's instantiation, but it is an [open source project](https://github.com/pmodels/mpich/blob/main/doc/wiki/how_to/Using_the_Hydra_Process_Manager.md). mpiexec.hydra's job is to spawn our [runme_intel64_prv](./binary/runme_intel64_prv) jobs on the cluster. `-perhost ${MPI_PER_NODE} -np ${MPI_PROC_NUM}` plus the hostfile or machinefile I mentioned in [runme_intel64_dynamic](#runme_intel_dynamic) are what is interpreted by `mpiexec.hydra`. This is how the command line arguments are interpreted:
+
+**-n <number-of-processes> or -np <number-of-processes>**  
+Use this option to set the number of MPI processes to run with the current argument set. In our case, this is going to run n instances of `runme_intel64_prv`. `runme_intel64_prv` in turn launches `xhpl_intel64_dynamic`.
+
+**-perhost <# of processes >, -ppn <# of processes >, or -grr <# of processes>**  
+Use this option to place the specified number of consecutive MPI processes on every host in the group using round robin scheduling. See the I_MPI_PERHOST environment variable for more details.
+
+**NOTE:** When running under a job scheduler, these options are ignored by default. To be able to control process placement with these options, disable the I_MPI_JOB_RESPECT_PROCESS_PLACEMENT variable.
+
+Ultimately, the `-perhost` setting controls how many MPI processes will spawn on each node. On Intel MKL LINPACK, these processes are `runme_intel64_prv` which spawns one parent instance of `xhpl_intel64_dynamic` which then in turn spawns many child threads. This is explained in more detail later.
+
+`I_MPI_PERHOST` is defined as
+
+**I_MPI_PERHOST**
+
+Define the default behavior for the `-perhost` option of the `mpiexec.hydra` command.
+
+**Syntax**
+
+`I_MPI_PERHOST=<value>`
+
+**Argument**
+
+| `<value>`     | Description                                     |
+|---------------|-------------------------------------------------|
+| `<value>`     | Define a value used for `-perhost` by default   |
+| `integer > 0` | Exact value for the option                      |
+| `all`         | All logical CPUs on the node                    |
+| `allcores`    | All cores (physical CPUs) on the node. This is the default value. |
+
+**Description**
+
+Set this environment variable to define the default behavior for the `-perhost` option. Unless specified explicitly, the `-perhost` option is implied with the value set in `I_MPI_PERHOST`.
+
+> **NOTE:** When running under a job scheduler, this environment variable is ignored by default. To control process placement with `I_MPI_PERHOST`, disable the `I_MPI_JOB_RESPECT_PROCESS_PLACEMENT` variable.
+
+#### But What the Heck Does that Mean
+
+Ok, so those were the descriptions in the docs for `-n` and `-ppn` but at least for me it wasn't immediately obvious what that would end up doing. Let's start with `-n`. What `-n` does is it will spawn `-n` instances of whatever process is *fed to `mpiexec.hydra`*. In our case this is going to be `runme_intel64_prv`. So if `-n` is 8, you will have 8 instances of `runme_intel64_prv` spread out across all your nodes.
+
+`-ppn` will control how many instances of `runme_intel64_prv` spawn per node round robin'd. I explain this in more detail in the section on [runme\_intel64\_prv](#runme_intel64_prv). Each instance of `runme_intel64_prv` will in turn spawn one parent instance of `xhpl_intel64_dynamic` which will then spawn as many threads as are in the NUMA domains allocated to it (controlled by `NUMA_PER_MPI`).
 
 
 
@@ -205,4 +303,4 @@ By default, neither of these are used and this can be ignored.
 
 Reference documentation for the usage of the new Leonardo supercomputer davinci-1 in : https://gitlab.leonardocompany.com/HPCC/hpc_usage/-/blob/master/Overview/General%20information/README.md
 
-Also if you are using Intel processors you can find useful information for the HPL.dat configuration in : https://www.intel.com/content/www/us/en/developer/articles/technical/fourth-generation-xeon-scalable-family-overview.html
+Also if you are using Intel processors you can find useful information for the HPL.dat configuration in : https://www.intel.com/content/www/us/en/developer/articles/technical/fourth-generation-xeon-scalable-family-overview.html : Intel(R) Xeon(R) Scalable Processors --> use NB= 384
