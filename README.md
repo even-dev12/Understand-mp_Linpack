@@ -3,7 +3,7 @@
 - [Understand and Run LINPACK](#understand-and-run-linpack)
   - [Understanding Intel's MKL LINPACK Process Flow](#understanding-intels-mkl-linpack-process-flow)
     - [runme\_intel\_dynamic](#runme_intel_dynamic)
-    - [Running the Linpack Benchmark with MPI A Detailed Guide](#running-the-linpack-benchmark-with-mpi-a-detailed-guide)
+    - [Running the Linpack Benchmark with MPI: A Detailed Guide](#running-the-linpack-benchmark-with-mpi-a-detailed-guide)
       - [I\_MPI\_HYDRA\_HOST\_FILE](#i_mpi_hydra_host_file)
     - [mpirun](#mpirun)
     - [runme\_intel64\_prv](#runme_intel64_prv)
@@ -139,7 +139,7 @@ mpirun -perhost ${MPI_PER_NODE} -np ${MPI_PROC_NUM} ./runme_intel64_prv "$@" | t
 
 To understand this command, `MPI_PER_NODE` and `MPI_PROC_NUM` read this:
 
-### [Running the Linpack Benchmark with MPI A Detailed Guide]
+### [Running the Linpack Benchmark with MPI: A Detailed Guide]
 
 This explains how to set up and run the Linpack benchmark using MPI. The configuration is done through a build.sh script and an example PBS script for managing job execution on the cluster. Additionally, it explains how to use Intel’s mpirun and the ease-of-use command-line parameters to replace HPL.dat, making the process more flexible.
 
