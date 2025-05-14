@@ -149,9 +149,11 @@ The build.sh script contains several key environment variables that define how t
 
 **MPI Configuration Variables**
 
-MPI_PROC_NUM: This variable defines the total number of MPI processes to run. The number of processes should match PxQ, where P is the number of rows and Q is the number of columns in the process grid.
+MPI_PROC_NUM: This variable defines the total number of MPI processes to run, which is directly related to the number of cores or CPUs allocated for the job. This can be adjusted based on the total number of cores across the nodes you plan to use.
+
+Example: If you're using 2 nodes with 24 cores each, then :
 ```
-  export MPI_PROC_NUM=2 (This sets the number of processes to 2).
+  MPI_PROC_NUM=48 would be the total number of MPI processes (one for each core).
 ```
 MPI_PER_NODE: This sets the number of MPI processes to run per node. It should be equal to the number of sockets on the system or 1. It is used in both the mpirun command and mpiexec.hydra.
 ```
