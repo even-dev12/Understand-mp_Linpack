@@ -2,8 +2,7 @@
     - [What is Numerical Stability](#what-is-numerical-stability)
     - [Right Looking LU Factorization](#right-looking-lu-factorization)
     - [Row Partial Pivoting](#row-partial-pivoting)
-
-Interpreting Benchmark Results for Single Node Test
+- [Interpreting Benchmark Results for MPI Node Test](#interpreting-benchmark-results-for-mpi-node-test)
 
 
 ## Interpreting Benchmark Results for Single Node Test
@@ -144,3 +143,20 @@ Right-looking LU factorization is a variant of the standard LU factorization. In
 ### Row Partial Pivoting
 
 Row-partial pivoting in LU factorization is a strategy to enhance numerical stability. It interchanges rows of the matrix as it's decomposed into lower (L) and upper (U) triangular matrices. Before zeroing out below-diagonal elements in a column, the algorithm swaps the current row with a below row that has the largest absolute value in the current column. This step helps prevent small pivot elements, which can lead to significant numerical errors, ensuring the algorithm remains stable even for matrices prone to inducing calculation inaccuracies.
+
+
+## Interpreting Benchmark Results for MPI Node Test
+
+Questa tabella riassume i risultati ottenuti su due nodi con architetture diverse usando LINPACK.
+**Risultati LINPACK Test**
+
+| Nodo | Coda  | N. Core | RAM   | N     | NB   | PxQ | Tempo (s)   | GFLOPS   |
+| ---- | ----- | ------- | ----- | ----- | ---- | --- | ----------- | -------- |
+| 122  | intel | 48      | 500Gb | 50000 | 1536 | 6x8 | 28633.59.00 | 2.91E+00 |
+| 9    | cpu   | 48      | 500Gb | 50000 | 384  | 6x8 | 21619.19.00 | 3.85E+00 |
+
+🔹 Istogramma prestazioni (GFLOPS per nodo + core)
+
+<img width="916" alt="Screenshot 2025-05-20 alle 16 32 26" src="https://github.com/user-attachments/assets/9fa76093-9981-4147-85f5-9d70cd1e4190" />
+
+
