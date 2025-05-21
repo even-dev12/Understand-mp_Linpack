@@ -159,11 +159,14 @@ Questa tabella riassume i risultati ottenuti su due nodi con architetture divers
 
 <img width="916" alt="Screenshot 2025-05-20 alle 16 32 26" src="https://github.com/user-attachments/assets/9fa76093-9981-4147-85f5-9d70cd1e4190" />
 
+(grafico in cui c'è il confronto con dvnode048 (N = 100k) (aggiungere i risultati del nodo intel con N=100k))
+<img width="975" alt="Screenshot 2025-05-21 alle 11 32 09" src="https://github.com/user-attachments/assets/01e5dd8c-80ba-4084-b3f9-af87fde3162e" />
 
 **Confronto prestazioni:**
 
 dvnode048 (N = 100k) raggiunge ~11.5 GFLOPS, nettamente superiore a dvnode009 (N = 50k) con ~3.8 GFLOPS, a parità di core (48).
 
-<img width="869" alt="Screenshot 2025-05-21 alle 11 10 50" src="https://github.com/user-attachments/assets/5cbee00a-d1ed-49b4-a220-2296eb779bce" />
+<img width="1018" alt="Screenshot 2025-05-21 alle 11 28 39" src="https://github.com/user-attachments/assets/636823e3-8f0e-447f-b5a4-3b462f36f21f" />
+
 
 
