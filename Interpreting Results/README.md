@@ -160,3 +160,10 @@ Questa tabella riassume i risultati ottenuti su due nodi con architetture divers
 <img width="916" alt="Screenshot 2025-05-20 alle 16 32 26" src="https://github.com/user-attachments/assets/9fa76093-9981-4147-85f5-9d70cd1e4190" />
 
 
+**Confronto prestazioni:**
+
+dvnode048 (N = 100k) raggiunge ~11.5 GFLOPS, nettamente superiore a dvnode009 (N = 50k) con ~3.8 GFLOPS, a parità di core (48).
+
+<img width="869" alt="Screenshot 2025-05-21 alle 11 10 50" src="https://github.com/user-attachments/assets/5cbee00a-d1ed-49b4-a220-2296eb779bce" />
+
+
